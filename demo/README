@@ -1,1 +1,16 @@
 This example demonstrates how the proposed technique downscales averaged sea surface temperature (SST) outputs for a sub-region of the Great Barrier Reef (GBR).
+
+Coarse resolution GCM averages and observational data should be provided in following formats. 
+
+(i) If N is the number of fine pixel locations in the region and To is the total
+time points in the current observational period, save observational data in a 
+matrix of the format N × (To + 2). First two additional columns will provide lon/lat information. Refer to the "Obs data.csv" file for an example.
+
+(ii) If M is the number of coarse grid cells in the region, T (> To) is the total
+number of time points in the current and the future downscaling periods,
+have the averaged climate model data saved in a matrix of the format 
+M × (T + 2). First two additional columns will provide lon/lat
+information. Name the fist two columns “lon”, “lat” and the subsequent
+columns with respective years. Naming the columns is crucial here as it
+enables the code to identify the model projections relevant to the training
+period.
