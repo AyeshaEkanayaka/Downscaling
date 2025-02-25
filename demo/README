@@ -11,7 +11,7 @@ enables the R functions to accurately identify the model projections that are re
 
 2. Downscaling
 
-Downscaling is performed by calling the R function 'Downscaling()', which initially preprocesses GCM data, followed by fitting the joint spatial model for SST processes.
+The 'Downscaling.R' script demonstrates the downscaling process, which starts with preprocessing GCM data and then proceeds to fit the joint spatial model for SST processes.
 
 2.1 Pre-processing GCM data
 
@@ -19,7 +19,7 @@ Considering that climate models frequently show systematic deviations from obser
 
 2.2 
 
-The 'Downscaling()' function relies on a MATLAB executable to fit the spatial model and, therefore, requires the MATLAB Runtime to operate.
+Downscaling.R relies on a MATLAB executable to fit the spatial model and, therefore, requires the MATLAB Runtime to operate.
 
 (i) Download and install MATLAB Runtime R2020b (9.9) from https://www.mathworks.com/products/compiler/matlab-runtime.html. MATLAB Runtime is a standalone set of shared libraries that enables the execution of a compiled MATLAB code. Note: The provided MATLAB application was compiled with MATLAB R2020b. Using a different version of MATLAB Runtime may require re-compiling the application to avoid potential errors.
 
