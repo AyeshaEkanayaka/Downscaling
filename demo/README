@@ -17,7 +17,7 @@ The 'Downscaling.R' script demonstrates the downscaling process, which starts wi
 
 Considering that climate models frequently show systematic deviations from observed data, we apply bias correction to the GCMs averages and interpolate them to match the resolution of observational data. We accomplish this by calling the R function "Stand_downscaling()," which implements the approach described by Van Hooidonk et al. (2015).
 
-2.2 
+2.2 Implementing the Spatial Model
 
 Downscaling.R relies on a MATLAB executable to fit the spatial model and, therefore, requires the MATLAB Runtime to operate.
 
