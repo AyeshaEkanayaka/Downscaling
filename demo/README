@@ -19,10 +19,8 @@ Considering that climate models frequently show systematic deviations from obser
 
 2.2 Implementing the Spatial Model
 
-Downscaling.R relies on a MATLAB executable to fit the spatial model and, therefore, requires the MATLAB Runtime to operate.
+Downscaling.R relies on a MATLAB executable to fit the spatial model and, therefore, requires the MATLAB Runtime to operate. Before running 'Downscaling.R', please ensure the following:
 
-(i) Download and install MATLAB Runtime R2020b (9.9) from https://www.mathworks.com/products/compiler/matlab-runtime.html. MATLAB Runtime is a standalone set of shared libraries that enables the execution of a compiled MATLAB code. Note: The provided MATLAB application was compiled with MATLAB R2020b. Using a different version of MATLAB Runtime may require re-compiling the application to avoid potential errors.
+(i) Install MATLAB Runtime R2020b (9.9) from https://www.mathworks.com/products/compiler/matlab-runtime.html. Note: The application was compiled with MATLAB R2020b, and using a different version may require recompiling the application.
 
-(ii) Download and save all the source files provided in 'src' into your working directory and execute the command chmod +x run BGL.sh in the terminal.
-
-(iii) Call the 'Downscaling()' function with the required inputs to perform the downscaling.
+(ii) Download and save all source files from the 'src' directory into your working directory and run the command chmod +x run BGL.sh in the terminal.
