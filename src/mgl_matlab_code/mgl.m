@@ -3,88 +3,97 @@ function [P,funVal] = mgl(S,params)
 global marks
 
 if nargin < 2
-  error('params.lambda and params.rho should be specified!');
+error('params.lambda and params.rho should be specified!');
 end
 
 if isfield(params,'lambda')
-    lambda = params.lambda;
+lambda = params.lambda;
 else
-   error('params.lambda should be specified!');
+  error('params.lambda should be specified!');
 end
 
 if isfield(params,'rho')
-    rho = params.rho;
+rho = params.rho;
 else
-   error('params.rho should be specified!');
+  error('params.rho should be specified!');
 end
 
 if ~isfield(params,'maxlineiter')
-    params.maxlineiter = 50;
+params.maxlineiter = 50;
 end
 if ~isfield(params,'SPGreltol')
-    params.SPGreltol = 1e-6;
+params.SPGreltol = 1e-6;
 end
 if ~isfield(params,'Newtontol')
-   params.Newtontol = 1e-6;
+params.Newtontol = 1e-6;
 end
 
 if ~isfield(params,'maxiter')
-   params.maxiter = 1500;
+params.maxiter = 1500;
 end
 
 if ~isfield(params,'sigma')
-   params.sigma = 1e-3;
+params.sigma = 1e-3;
 end
 
 if ~isfield(params,'SPGmaxiter')
-   params.SPGmaxiter = 150;
+params.SPGmaxiter = 150;
 end
 
 [n,n,K] = size(S);
 if isfield(params, 'P0')
-    P = params.P0;
+P = params.P0;
 else
-    P = zeros(n,n,K);
-    for k = 1:K
-        P(:,:,k) = diag(1./diag(S(:,:,k)));
-    end
+  P = zeros(n,n,K);
+for k = 1:K
+P(:,:,k) = diag(1./diag(S(:,:,k)));
+end
 end
 
 if ~isfield(params, 'penalty')
-    params.penalty = 0;
+params.penalty = 0;
 end
 
 if ~isfield(params, 'display')
-    params.display = 1;
+params.display = 1;
 end
 
 marks = zeros(n,n,K);
 for k = 1:K
-    marks(:,:,k) = 1 - eye(n,n);
+marks(:,:,k) = 1 - eye(n,n);
 end
 
 funVal = [];
 R = zeros(n,n,K);
 B = R;
 for k = 1:K
-    [R(:,:,k),info] = chol(P(:,:,k));
-    if info > 0
-        error('%d not positive definite', k);
-    end
-    invR = inv(R(:,:,k));
-    B(:,:,k) = invR*invR';
+[R(:,:,k),info] = chol(P(:,:,k));
+if info > 0
+error('%d not positive definite', k);
+end
+invR = inv(R(:,:,k));
+B(:,:,k) = invR*invR';
 end
 
 [fobjp, l1normX] = computLogDet(P, S, R, lambda, rho, params.penalty);
 funVal(1) = fobjp;
-fx = zeros((n-1)*n/2,1);
-fy = zeros((n-1)*n/2,1);
+if n==2
+    fx = zeros((n-1)*n/2,2);
+    fy = zeros((n-1)*n/2,2);
+else
+    fx = zeros((n-1)*n/2,1);
+    fy = zeros((n-1)*n/2,1);
+end
 tev = zeros(K,1);
 iter = 1;
 while (1)
     iter = iter+1;
     G = S - B;
     numF = findFreeSet(G,P,fx,fy,lambda,rho,tev,params.penalty);
+    if n==2
+        fx = fx(1);
+        fy = fy(1);
+    end
     params.NumF = numF;
     D = mgl_spg(S,P*1.0,params,B,fx,fy,max(params.SPGreltol,0));
 
@@ -115,45 +124,45 @@ while (1)
         t1 = G(:,:,k);
         t2 = D(:,:,k);
         trdg = trdg + t1(:)'*t2(:);
-    end
-    
-    fobjp1 = 1e15;
-    for liter = 1 : params.maxlineiter
-        W = P+alpha*D;
-        flag = 0;
-        for k = 1:K
-            [Tz,info] = chol(W(:,:,k));
-            if info > 0
-                flag = 1;
-                break;
-            end
-            R(:,:,k) = Tz;
-        end
-        
-        if flag == 1
-            alpha = alpha/2;
-            continue;
-        end
-        
-        [fobj, l1normX1] = computLogDet(W, S, R, lambda, rho, params.penalty);
-        if params.display
-           fprintf('outer:%d inner%d, Linear search decreases %f and norm of D is %f, number of free set %d\n', iter, liter,fobjp - fobj, norm(D(:),'inf'), numF);
-        end
-        if fobj <= fobjp + alpha*params.sigma*(trdg + l1normXD - l1normX);
-            l1normX = l1normX1;
-            break;
-        end
-        
-        if fobjp1 < fobj
-            l1normX = l1normX1;
-            break
-        end
-        fobjp1 = fobj;
-        alpha = alpha/2;
-    end
-    P = W;
-    
-   % fprintf('fset %f, fist %f,  linet %f\n', fset,fist,linet);
+end
+
+fobjp1 = 1e15;
+for liter = 1 : params.maxlineiter
+W = P+alpha*D;
+flag = 0;
+for k = 1:K
+[Tz,info] = chol(W(:,:,k));
+if info > 0
+flag = 1;
+break;
+end
+R(:,:,k) = Tz;
+end
+
+if flag == 1
+alpha = alpha/2;
+continue;
+end
+
+[fobj, l1normX1] = computLogDet(W, S, R, lambda, rho, params.penalty);
+if params.display
+fprintf('outer:%d inner%d, Linear search decreases %f and norm of D is %f, number of free set %d\n', iter, liter,fobjp - fobj, norm(D(:),'inf'), numF);
+end
+if fobj <= fobjp + alpha*params.sigma*(trdg + l1normXD - l1normX);
+l1normX = l1normX1;
+break;
+end
+
+if fobjp1 < fobj
+l1normX = l1normX1;
+break
+end
+fobjp1 = fobj;
+alpha = alpha/2;
+end
+P = W;
+
+% fprintf('fset %f, fist %f,  linet %f\n', fset,fist,linet);
     
     funVal(iter) = fobj;
     
@@ -162,21 +171,21 @@ while (1)
         for k = 1:K
             invR = inv(R(:,:,k));
             B(:,:,k) = invR*invR';
-        end
-        continue
-    end
-    
-    if(abs(funVal(iter) - funVal(iter-1)) < params.Newtontol*abs(funVal(iter-1))) || norm(D(:),'inf') < 5e-5
-        break;
-    end
-    
-    if iter>params.maxiter
-        break;
-    end
-    
-    for k = 1:K
-        invR = inv(R(:,:,k));
-        B(:,:,k) = invR*invR';
+end
+continue
+end
+
+if(abs(funVal(iter) - funVal(iter-1)) < params.Newtontol*abs(funVal(iter-1))) || norm(D(:),'inf') < 5e-5
+break;
+end
+
+if iter>params.maxiter
+break;
+end
+
+for k = 1:K
+invR = inv(R(:,:,k));
+B(:,:,k) = invR*invR';
     end
 end
 
@@ -197,15 +206,15 @@ W = W.*marks;
 l1normX = sum(abs(W(:)));
 PW = W;
 switch penalty
-    case 0
-        PW = PW(:,:,1:K-1) - PW(:,:,2:K);
-        PW = sum(abs(PW),3);
-    case 1
-        PW = PW.*PW;
-        PW = sqrt(sum(abs(PW),3));
-    otherwise
-        PW = PW(:,:,1:K-1) - PW(:,:,2:K);
-        PW = sum(abs(PW),3);
+case 0
+PW = PW(:,:,1:K-1) - PW(:,:,2:K);
+PW = sum(abs(PW),3);
+case 1
+PW = PW.*PW;
+PW = sqrt(sum(abs(PW),3));
+otherwise
+PW = PW(:,:,1:K-1) - PW(:,:,2:K);
+PW = sum(abs(PW),3);
 end
 l1normX = lambda*l1normX + rho*sum(PW(:));
 
@@ -218,8 +227,8 @@ global marks
 hatP = hatP.*marks;
 opterr = 0;
 for k = 1:K
-    Wz = B(:,:,k)*D(:,:,k);
-    opterr = opterr + Wz(:)'*Wz(:)/2 + ...
+Wz = B(:,:,k)*D(:,:,k);
+opterr = opterr + Wz(:)'*Wz(:)/2 + ...
         trace((S(:,:,k) - B(:,:,k))*D(:,:,k));
 end
 opterr = opterr + lambda*sum(abs(hatP(:)));
@@ -291,22 +300,22 @@ while (iter < params.SPGmaxiter)
         D = P - hatP;
         fnew = objcompute(P-P_start,P, B, S, K, l1reg, freg,params.penalty);
         ddr = D(:)'*D(:);
-        f_threshold = max(f_1) - 0.5*gamma*lambdak*ddr;
-        if fnew <= f_threshold
-            cont_inner=0;
-        else
-            lambdak = eta*lambdak;
-        end
-    end
-    f_1(mod(iter,M)+1) = fnew;
-    funVal(iter) = fnew;
-    hatgrad = grad;
-    for k = 1:K
-        grad(:,:,k) = B(:,:,k)*P(:,:,k)*B(:,:,k);
-    end
-    grad  = grad + SB;
-    gk = grad - hatgrad;
-    td = D(:)'*gk(:);
+f_threshold = max(f_1) - 0.5*gamma*lambdak*ddr;
+if fnew <= f_threshold
+cont_inner=0;
+else
+  lambdak = eta*lambdak;
+end
+end
+f_1(mod(iter,M)+1) = fnew;
+funVal(iter) = fnew;
+hatgrad = grad;
+for k = 1:K
+grad(:,:,k) = B(:,:,k)*P(:,:,k)*B(:,:,k);
+end
+grad  = grad + SB;
+gk = grad - hatgrad;
+td = D(:)'*gk(:);
     if td <=0
         lambdak = lambdamax;
         continue
