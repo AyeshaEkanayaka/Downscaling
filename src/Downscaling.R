@@ -1,7 +1,3 @@
-path_matlabRuntime="" #Where Matlab runtime is installed
-path=""#Path to your working directory
-Freq=12#Frequency of your data. For example if its is monthly data,frequency is 12. If it is daily data, frequency is 365.
-
 Downscaling=function(path_matlabRuntime,path,Freq){
   # Check if the package is installed; if not, install it
   # Define the package name you want to load
